@@ -8,11 +8,30 @@ local BASE_URL = "https://raw.githubusercontent.com/LexarZ-lua/LexarZUI/main/"
 
 -- Utility: GitHub’dan modül çek ve return et
 local function import(path)
-    local raw = HttpService:GetAsync(BASE_URL .. path, true)
+    -- Debug: Dosya çekilmeden önce konsola yazdır
+    print("Çekilen dosya URL: " .. BASE_URL .. path)
+
+    -- URL üzerinden dosyayı al
+    local raw
+    local success, errorMessage = pcall(function()
+        raw = HttpService:GetAsync(BASE_URL .. path, true)
+    end)
+
+    -- Hata durumunda hata mesajını yazdır
+    if not success then
+        warn("Hata oluştu: " .. errorMessage)
+        return nil
+    end
+    
+    -- Debug: Dosya içeriğini konsola yazdır (isteğe bağlı)
+    print("Dosya içeriği başarıyla alındı.")
+
     return loadstring(raw)()
 end
 
 -- Import modüller
+print("Modüller yükleniyor...")
+
 local Signals    = import("Utils/Signals.lua")
 local Drag       = import("Utils/Drag.lua")
 
@@ -30,10 +49,12 @@ local Toggle     = import("Components/Toggle.lua")
 local ColorPicker= import("Components/ColorPicker.lua") -- efekt için örnek
 
 -- Create ScreenGui
+print("ScreenGui oluşturuluyor...")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Create Window
+print("Window oluşturuluyor...")
 local window = Window.new(screenGui,
     UDim2.new(0.25, 0, 0.25, 0),
     UDim2.new(0.5, 0, 0.5, 0),
@@ -44,6 +65,7 @@ local window = Window.new(screenGui,
 Drag:MakeDraggable(window.Window)
 
 -- Create Tabs
+print("Tabs oluşturuluyor...")
 local tabs = Tabs.new(screenGui,
     UDim2.new(0.25, 0, 0.1, 0),
     {"Home","Settings","About"},
@@ -74,4 +96,15 @@ Slider.new(tab1content, UDim2.new(0.1,0,0.6,0),
     0,100,50, function(v) print("Slider:", v) end
 )
 
-print("LexarZUI Loaded!")
+-- Test TextBox
+TextBox.new(tab1content, UDim2.new(0.1,0,0.8,0), "Enter text", function(text)
+    print("Text entered:", text)
+end)
+
+-- Test Toggle
+Toggle.new(tab1content, UDim2.new(0.1,0,1,0), true, function(state)
+    print("Toggle state:", state)
+end)
+
+-- Final Debug Message
+print("LexarZUI başarıyla yüklendi!")
